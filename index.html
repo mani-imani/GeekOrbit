@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="داشبورد محلی و آفلاین که نشان می‌دهد هر پروژه و هر گفت‌وگو روی کدام‌یک از چند حساب چت‌بات هوش مصنوعی است.">
+  <title>GeekOrbit</title>
+  <link rel="icon" href="assets/icons/geekorbit-icon.svg" type="image/svg+xml">
+  <link rel="icon" href="assets/icons/geekorbit-icon-32.png" type="image/png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/icons/geekorbit-icon-256.png">
+  <link rel="stylesheet" href="css/geek.css">
+  <link rel="stylesheet" href="css/geekorbit.css">
+  <script>
+    /* Apply the saved theme before the first paint. */
+    try {
+      var t = localStorage.getItem('geekorbit-theme');
+      if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  </script>
+  <script src="vendor/sql-wasm.js"></script>
+  <script type="module" src="js/main.js"></script>
+</head>
+<body>
+  <a class="go-skip" href="#app">رفتن به محتوا</a>
+
+  <header class="go-header" id="header" hidden>
+    <div class="gm-page go-header__inner">
+      <a class="go-brand" href="#/dashboard" aria-label="GeekOrbit، داشبورد">
+        <img class="go-wm-light" src="assets/logo/geekorbit-wordmark-light.svg" alt="">
+        <img class="go-wm-dark" src="assets/logo/geekorbit-wordmark-dark.svg" alt="">
+      </a>
+      <nav class="go-nav" id="nav" aria-label="بخش‌ها"></nav>
+      <div class="go-header__tools" id="headerTools"></div>
+    </div>
+  </header>
+
+  <main class="go-main gm-page" id="app" tabindex="-1"></main>
+
+  <footer class="go-footer">
+    <div class="gm-page go-footer__inner">
+      <div class="go-footer__side">
+        <div class="gm-seg" id="themeSwitch" role="group" aria-label="پوسته">
+          <button type="button" data-theme-choice="system" aria-pressed="true">سیستم</button>
+          <button type="button" data-theme-choice="light" aria-pressed="false">روشن</button>
+          <button type="button" data-theme-choice="dark" aria-pressed="false">تیره</button>
+        </div>
+        <span class="gm-status go-dbstatus" id="dbStatus" role="status" hidden></span>
+      </div>
+      <div class="go-footer__side">
+        <span class="go-version" dir="ltr" lang="en" id="version"></span>
+        <a class="gm-sign" href="https://github.com/mani-imani" target="_blank" rel="noopener">از گیک‌مانی<i class="gm-cursor"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <div class="go-toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="dialogRoot"></div>
+
+  <noscript><p class="gm-page">برای اجرای <bdi>GeekOrbit</bdi> باید جاوااسکریپت روشن باشد.</p></noscript>
+</body>
+</html>
