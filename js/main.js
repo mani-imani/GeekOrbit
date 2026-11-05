@@ -47,6 +47,7 @@ function showStatus(state) {
   if (state === 'saving') el.textContent = 'در حال ذخیره…';
   else if (state === 'saved') el.textContent = 'ذخیره شد';
   else if (state === 'error') { el.textContent = 'ذخیره در فایل انجام نشد'; el.classList.add('is-error'); }
+  else if (state === 'demo') { el.classList.add('is-manual'); el.textContent = 'حالت نمونه؛ چیزی ذخیره نمی‌شود'; }
   else {
     el.classList.add('is-manual');
     el.textContent = db.hasUnsavedChanges() ? 'ذخیره‌نشده، نسخه‌ی SQLite را دانلود کنید' : 'بدون فایل';
@@ -119,19 +120,25 @@ function showGate(message = '') {
         <img class="go-gate__icon" src="assets/icons/geekorbit-icon.svg" alt="" width="72" height="72">
         <img class="go-gate__word go-wm-light" src="assets/logo/geekorbit-wordmark-light.svg" alt="GeekOrbit">
         <img class="go-gate__word go-wm-dark" src="assets/logo/geekorbit-wordmark-dark.svg" alt="GeekOrbit">
-        <p>داشبورد محلی و آفلاین که نشان می‌دهد هر پروژه و هر گفت‌وگو روی کدام‌یک از حساب‌های چت‌بات شماست.</p>
-        <p class="gm-muted">داده‌ها در یک فایل SQLite روی همین دستگاه می‌مانند.</p>
+        <p>اگر چند حساب چت‌بات هوش مصنوعی دارید، <bdi>GeekOrbit</bdi> نشان می‌دهد هر پروژه و هر گفت‌وگو روی کدام حساب است، کدام چت‌ها باز مانده‌اند و از کجا باید ادامه داد.</p>
+        <ul class="go-gate__points">
+          <li>${icon('folder2')}<span>حساب‌ها، پروژه‌ها و چت‌ها در یک نگاه</span></li>
+          <li>${icon('clipboard-check')}<span>یادداشت تحویل برای ادامه در یک گفت‌وگوی تازه</span></li>
+          <li>${icon('database-down')}<span>همه‌چیز در یک فایل <bdi>SQLite</bdi> روی دستگاه خودتان؛ هیچ داده‌ای به جایی فرستاده نمی‌شود</span></li>
+        </ul>
         ${message ? `<p class="go-form-error" role="alert">${message}</p>` : ''}
         <div class="go-gate__actions">
           <button type="button" class="gm-btn gm-btn--primary" data-gate="new">${icon('plus-lg')} ساخت پایگاه داده‌ی تازه</button>
           <button type="button" class="gm-btn gm-btn--secondary" data-gate="open">${icon('folder2')} باز کردن فایل موجود</button>
           <input type="file" id="gateFile" accept=".sqlite,.db" hidden>
+          <button type="button" class="go-gate__demo" data-gate="demo">${icon('speedometer2')} اول با داده‌ی نمونه امتحان کنید</button>
         </div>
         <p class="go-gate__note">${fsa ? 'تغییرها خودکار در همان فایل ذخیره می‌شوند.' : 'این مرورگر نوشتن در فایل را پشتیبانی نمی‌کند. تغییرها را با دانلود نسخه‌ی SQLite نگه دارید. برای ذخیره‌ی خودکار، Chrome یا Edge را باز کنید.'}</p>
       </div>
     </section>`;
   const fileInput = $('gateFile');
   app.querySelector('[data-gate="new"]').addEventListener('click', () => guard(() => db.createNew()));
+  app.querySelector('[data-gate="demo"]').addEventListener('click', () => guard(() => db.createDemo()));
   app.querySelector('[data-gate="open"]').addEventListener('click', () => {
     if (fsa) guard(() => db.openWithPicker());
     else fileInput.click();
@@ -181,7 +188,8 @@ async function afterLoad() {
   }
   started = true;
   $('header').hidden = false;
-  showStatus(db.hasFileHandle() ? 'saved' : 'manual');
+  showStatus(db.isDemo() ? 'demo' : (db.hasFileHandle() ? 'saved' : 'manual'));
+  if (db.isDemo()) toast('حالت نمونه: هر چه می‌خواهید امتحان کنید؛ با بستن صفحه همه‌چیز پاک می‌شود.');
   if (!location.hash || location.hash === '#') location.hash = '#/dashboard';
   route(true);
 }

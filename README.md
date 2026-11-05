@@ -7,7 +7,8 @@
 <p align="center" dir="rtl">داشبورد محلی و آفلاین که نشان می‌دهد هر پروژه و هر گفت‌وگو روی کدام‌یک از حساب‌های چت‌بات هوش مصنوعی شماست.</p>
 <p align="center">A local, offline dashboard that shows which of your AI chatbot accounts each project and conversation lives on.</p>
 
-<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.0.0</code></p>
+<p align="center"><a href="https://mani-imani.github.io/GeekOrbit/"><b>mani-imani.github.io/GeekOrbit</b></a></p>
+<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.1.0</code></p>
 
 <p align="center"><img src="docs/screenshot.png" alt="GeekOrbit dashboard" width="760"></p>
 
@@ -28,7 +29,9 @@
 وقتی چند حساب چت‌بات دارید، پیدا کردن این‌که فلان گفت‌وگو کجا بود کم‌کم وقت‌گیر می‌شود. <bdi>GeekOrbit</bdi> این را در یک نگاه نشان می‌دهد.
 
 ### اجرا
-برنامه ایستا است، ولی مرورگر <bdi>WebAssembly</bdi> را از روی <code dir="ltr">file&#58;//</code> بارگذاری نمی‌کند؛ پس یک سرور ساده‌ی محلی لازم است:
+ساده‌ترین راه، نسخه‌ی آنلاین است: [mani-imani.github.io/GeekOrbit](https://mani-imani.github.io/GeekOrbit/). برنامه کاملاً داخل مرورگر اجرا می‌شود و داده‌ها فقط در فایلی روی دستگاه خودتان ذخیره می‌شوند. با «اول با داده‌ی نمونه امتحان کنید» هم می‌توانید بدون ساختن فایل، برنامه را ببینید.
+
+برای اجرای محلی: برنامه ایستا است، ولی مرورگر <bdi>WebAssembly</bdi> را از روی <code dir="ltr">file&#58;//</code> بارگذاری نمی‌کند؛ پس یک سرور ساده‌ی محلی لازم است:
 
 <div dir="ltr">
 
@@ -84,7 +87,7 @@ GeekOrbit/
 کد با مجوز <bdi>MIT</bdi> (فایل <code dir="ltr">LICENSE</code>). <bdi>sql.js</bdi> و آیکون‌های <bdi>Bootstrap</bdi> مجوز <bdi>MIT</bdi> و فونت‌ها مجوز <bdi>SIL OFL</bdi> دارند؛ فایل مجوز هر کدام کنار خودش است.
 
 ### نسخه
-<code dir="ltr">v2.0.0</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
+<code dir="ltr">v2.1.0</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
 
 </div>
 
@@ -103,7 +106,9 @@ GeekOrbit/
 With several chatbot accounts, finding where a conversation lives slowly eats time. GeekOrbit shows it at a glance.
 
 ### Run
-The app is static, but browsers don't load WebAssembly from `file://`, so serve the folder locally:
+The easiest way is the online version: [mani-imani.github.io/GeekOrbit](https://mani-imani.github.io/GeekOrbit/). The app runs entirely in your browser and your data is saved only to a file on your own device. «اول با داده‌ی نمونه امتحان کنید» (try it with sample data) opens it without creating a file.
+
+To run it locally: the app is static, but browsers don't load WebAssembly from `file://`, so serve the folder locally:
 
 ```bash
 cd GeekOrbit
@@ -151,7 +156,7 @@ GeekOrbit/
 Code under the MIT license (see [LICENSE](LICENSE)). sql.js and Bootstrap Icons are MIT; the fonts are SIL OFL. Each license file sits next to its files.
 
 ### Version
-`v2.0.0` · see [CHANGELOG.md](CHANGELOG.md).
+`v2.1.0` · see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

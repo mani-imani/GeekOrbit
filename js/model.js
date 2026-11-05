@@ -1,6 +1,6 @@
 // GeekOrbit — shared vocabulary: statuses, priorities and thresholds.
 
-export const VERSION = 'v2.0.0';
+export const VERSION = 'v2.1.0';
 export const STALE_DAYS = 14;    // an active chat untouched this long counts as stale
 export const BACKUP_DAYS = 7;    // remind about a backup after this many days
 

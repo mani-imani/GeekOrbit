@@ -355,6 +355,13 @@ a.go-row:hover { background: var(--gm-chip); }
 .go-gate__actions { display: grid; gap: var(--gm-space-3); margin-block-start: var(--gm-space-6); }
 .go-gate__actions .gm-btn { padding: 11px 18px; }
 .go-gate__note { margin: var(--gm-space-5) 0 0 !important; color: var(--gm-muted); font-size: 13px; }
+.go-gate__points { list-style: none; margin: var(--gm-space-5) 0 0; padding: 0; display: grid; gap: var(--gm-space-3); text-align: start; }
+.go-gate__points li { display: flex; align-items: flex-start; gap: var(--gm-space-3); color: var(--gm-muted); font-size: var(--gm-size-sm); line-height: 1.8; }
+.go-gate__points svg { flex: none; width: 18px; height: 18px; margin-block-start: .3em; color: var(--gm-accent); }
+.go-gate__demo { justify-self: center; display: inline-flex; align-items: center; gap: var(--gm-space-2); margin-block-start: var(--gm-space-2);
+  padding: 6px 10px; border: 0; background: none; color: var(--gm-accent); font: inherit; font-size: var(--gm-size-sm); font-weight: 600;
+  cursor: pointer; text-decoration: underline; text-underline-offset: 4px; }
+.go-gate__demo svg { width: 16px; height: 16px; }
 
 .go-toast {
   position: fixed; inset-inline: 0; bottom: var(--gm-space-5); z-index: 200;

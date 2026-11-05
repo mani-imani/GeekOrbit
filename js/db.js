@@ -4,6 +4,7 @@
 // download flow.
 
 import { SCHEMA_SQL, SCHEMA_VERSION, migrateV1toV2 } from './schema.js';
+import { fillDemo } from './demo.js';
 import { todayISO } from './util.js';
 
 let SQL = null;
@@ -13,6 +14,7 @@ let saveTimer = null;
 let txDepth = 0;
 let pending = false;   // a write to the file is queued or running
 let dirty = false;     // manual mode: changes not yet downloaded
+let demo = false;      // sample data in memory only: nothing to save, nothing to warn about
 
 const changeListeners = new Set();
 const statusListeners = new Set();
@@ -48,6 +50,7 @@ export async function createNew() {
     });
   }
   open(null);
+  demo = false;
   db.run(SCHEMA_SQL);
   db.run(`INSERT INTO meta (key, value) VALUES ('schema_version', ?)`, [String(SCHEMA_VERSION)]);
   db.run(`INSERT INTO meta (key, value) VALUES ('created_at', ?)`, [todayISO()]);
@@ -56,6 +59,22 @@ export async function createNew() {
   if (fileHandle) await writeNow();
   else { dirty = true; emitStatus('manual'); }
 }
+
+/** Sample data in memory, for trying the app. Never saved; the tab is the whole session. */
+export async function createDemo() {
+  await ensureEngine();
+  open(null);
+  db.run(SCHEMA_SQL);
+  db.run(`INSERT INTO meta (key, value) VALUES ('schema_version', ?)`, [String(SCHEMA_VERSION)]);
+  db.run(`INSERT INTO meta (key, value) VALUES ('last_backup', ?)`, [todayISO()]);
+  db.run('BEGIN');
+  fillDemo((sql, params) => db.run(sql, params));
+  db.run('COMMIT');
+  fileHandle = null; dirty = false; demo = true;
+  emitStatus('demo');
+}
+
+export const isDemo = () => demo;
 
 export async function openWithPicker() {
   await ensureEngine();
@@ -82,6 +101,7 @@ export async function openFromFile(file) {
 const tableNames = () => all(`SELECT name FROM sqlite_master WHERE type = 'table'`).map((r) => r.name);
 
 function loadBytes(bytes) {
+  demo = false;
   open(bytes);
   try {
     const tables = tableNames();
@@ -106,12 +126,12 @@ function loadBytes(bytes) {
 export function close() {
   clearTimeout(saveTimer);
   if (db) db.close();
-  db = null; fileHandle = null; pending = false; dirty = false; txDepth = 0;
+  db = null; fileHandle = null; pending = false; dirty = false; txDepth = 0; demo = false;
 }
 
 export const isReady = () => !!db;
 export const hasFileHandle = () => !!fileHandle;
-export const hasUnsavedChanges = () => pending || dirty;
+export const hasUnsavedChanges = () => !demo && (pending || dirty);
 export function schemaVersion() {
   if (!tableNames().includes('meta')) return 1;
   return Number(one(`SELECT value FROM meta WHERE key = 'schema_version'`)?.value || 1);
@@ -149,6 +169,8 @@ function afterChange() {
     emitStatus('saving');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(writeNow, 350);
+  } else if (demo) {
+    emitStatus('demo');
   } else {
     dirty = true;
     emitStatus('manual');
