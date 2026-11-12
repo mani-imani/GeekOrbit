@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.2.0 · Nov 2026
+- Install as an app (PWA): a web app manifest, brand icons for the home screen (including a maskable one), and a service worker that keeps the whole app, sql.js included, for offline use. Your data still lives only in your `.sqlite` file.
+- Install card on the first visit, on every browser that can install the app: the browser's own prompt where it offers one, otherwise the steps for iPhone and iPad, Android, Mac and desktop Chrome or Edge. Afterwards an "install on this device" link stays in the footer.
+- New versions download in the background; a bar offers to reload, and warns first if there are changes not yet downloaded.
+
 ## v2.1.0 · Nov 2026
 - Online at mani-imani.github.io/GeekOrbit: the app still runs entirely in the browser and saves only to a file on your device.
 - "Try it with sample data" on the start screen: four projects, three accounts and five chats in memory; nothing is saved and closing the tab ends it.

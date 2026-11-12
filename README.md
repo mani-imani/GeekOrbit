@@ -8,7 +8,7 @@
 <p align="center">A local, offline dashboard that shows which of your AI chatbot accounts each project and conversation lives on.</p>
 
 <p align="center"><a href="https://mani-imani.github.io/GeekOrbit/"><b>mani-imani.github.io/GeekOrbit</b></a></p>
-<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.1.0</code></p>
+<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.2.0</code></p>
 
 <p align="center"><img src="docs/screenshot.png" alt="GeekOrbit dashboard" width="760"></p>
 
@@ -43,6 +43,15 @@ python3 -m http.server 8000
 
 </div>
 
+### نصب به‌شکل برنامه
+GeekOrbit یک <bdi>PWA</bdi> است: می‌شود آن را مثل یک برنامه نصب کرد تا جدا از مرورگر و تمام‌صفحه باز شود و بدون اینترنت هم کار کند. بار اول یک کارت راهنما پایین صفحه می‌آید. بعد از آن هم پیوند «نصب روی این دستگاه» در پایین صفحه هست.
+
+- **<bdi>Chrome</bdi> و <bdi>Edge</bdi> (کامپیوتر و اندروید):** دکمه‌ی «نصب» در همان کارت، یا آیکون نصب در نوار آدرس.
+- **آیفون و آیپد:** دکمه‌ی اشتراک‌گذاری، بعد «<bdi>Add to Home Screen</bdi>».
+- **مک (<bdi>Safari</bdi>):** منوی <bdi>File</bdi>، بعد «<bdi>Add to Dock</bdi>».
+
+نصب چیزی را درباره‌ی داده‌ها عوض نمی‌کند: همه‌چیز مثل قبل در فایل <bdi dir="ltr">.sqlite</bdi> خودتان ذخیره می‌شود. برنامه‌ی نصب‌شده هر نسخه‌ی تازه را در پس‌زمینه می‌گیرد و برای بارگذاری دوباره اجازه می‌خواهد.
+
 ### استفاده
 1. «ساخت پایگاه داده‌ی تازه» را بزنید و جای فایل را انتخاب کنید، یا فایل موجود را باز کنید.
 2. در بخش حساب‌ها، حساب‌هایتان را ثبت کنید.
@@ -70,6 +79,8 @@ python3 -m http.server 8000
 ```
 GeekOrbit/
 ├── index.html
+├── manifest.webmanifest  تنظیمات نصب (PWA)
+├── sw.js               نگه‌داشتن برنامه برای کار بدون اینترنت
 ├── js/                 برنامه (ماژول‌های ES، بدون فریم‌ورک)
 │   └── views/          صفحه‌ها
 ├── css/geek.css        سیستم طراحی GeekMani (بدون تغییر)
@@ -87,7 +98,7 @@ GeekOrbit/
 کد با مجوز <bdi>MIT</bdi> (فایل <code dir="ltr">LICENSE</code>). <bdi>sql.js</bdi> و آیکون‌های <bdi>Bootstrap</bdi> مجوز <bdi>MIT</bdi> و فونت‌ها مجوز <bdi>SIL OFL</bdi> دارند؛ فایل مجوز هر کدام کنار خودش است.
 
 ### نسخه
-<code dir="ltr">v2.1.0</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
+<code dir="ltr">v2.2.0</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
 
 </div>
 
@@ -116,6 +127,15 @@ python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 
+### Install as an app
+GeekOrbit is a PWA: you can install it so it opens in its own window and works without internet. A small card explains how on the first visit; afterwards the footer keeps an "install on this device" link.
+
+- **Chrome and Edge (desktop and Android):** the card's "Install" button, or the install icon in the address bar.
+- **iPhone and iPad:** the Share button, then "Add to Home Screen".
+- **Mac (Safari):** File, then "Add to Dock".
+
+Installing changes nothing about your data: everything is still saved to your own `.sqlite` file. The installed app downloads each new version in the background and asks before reloading.
+
 ### Use
 1. Click «ساخت پایگاه داده‌ی تازه» (new database) and choose where to save it, or «باز کردن فایل موجود» (open an existing file). The interface is in Persian.
 2. Add your accounts under «حساب‌ها» (accounts).
@@ -141,6 +161,8 @@ Open your v1 file. The app offers a backup first, then updates the file once: it
 ```
 GeekOrbit/
 ├── index.html
+├── manifest.webmanifest  install settings (PWA)
+├── sw.js               keeps the app for offline use
 ├── js/                 the app (ES modules, no framework)
 │   └── views/          pages
 ├── css/geek.css        GeekMani design system (unchanged)
@@ -156,7 +178,7 @@ GeekOrbit/
 Code under the MIT license (see [LICENSE](LICENSE)). sql.js and Bootstrap Icons are MIT; the fonts are SIL OFL. Each license file sits next to its files.
 
 ### Version
-`v2.1.0` · see [CHANGELOG.md](CHANGELOG.md).
+`v2.2.0` · see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

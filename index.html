@@ -12,7 +12,13 @@
   <meta property="og:image" content="https://mani-imani.github.io/GeekOrbit/assets/icons/geekorbit-avatar-640.png">
   <link rel="icon" href="assets/icons/geekorbit-icon.svg" type="image/svg+xml">
   <link rel="icon" href="assets/icons/geekorbit-icon-32.png" type="image/png" sizes="32x32">
-  <link rel="apple-touch-icon" href="assets/icons/geekorbit-icon-256.png">
+  <link rel="apple-touch-icon" href="assets/icons/geekorbit-apple-touch-180.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#F4F4F0" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0E1217" media="(prefers-color-scheme: dark)">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="GeekOrbit">
   <link rel="stylesheet" href="css/geek.css">
   <link rel="stylesheet" href="css/geekorbit.css">
   <script>
@@ -52,12 +58,18 @@
         <span class="gm-status go-dbstatus" id="dbStatus" role="status" hidden></span>
       </div>
       <div class="go-footer__side">
+        <button type="button" class="go-install-link" id="installLink" hidden>نصب روی این دستگاه</button>
         <span class="go-version" dir="ltr" lang="en" id="version"></span>
         <a class="gm-sign" href="https://github.com/mani-imani" target="_blank" rel="noopener">از گیک‌مانی<i class="gm-cursor"></i></a>
       </div>
     </div>
   </footer>
 
+  <div class="go-update" id="updateBar" role="status" hidden>
+    <span>نسخه‌ی تازه‌ی <bdi>GeekOrbit</bdi> آماده است.</span>
+    <button type="button" class="gm-btn gm-btn--primary" data-update>بارگذاری دوباره</button>
+    <button type="button" class="gm-btn gm-btn--secondary" data-update-later>بعداً</button>
+  </div>
   <div class="go-toast" id="toast" role="status" aria-live="polite"></div>
   <div id="dialogRoot"></div>
 

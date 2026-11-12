@@ -12,6 +12,7 @@ import * as chats from './views/chats.js';
 import * as accounts from './views/accounts.js';
 import * as tags from './views/tags.js';
 import * as changelog from './views/changelog.js';
+import { initPWA } from './pwa.js';
 
 const VIEWS = { dashboard, projects, chats, accounts, tags, changelog };
 const $ = (id) => document.getElementById(id);
@@ -201,3 +202,4 @@ initTheme();
 buildChrome();
 initShortcuts();
 showGate();
+initPWA();
