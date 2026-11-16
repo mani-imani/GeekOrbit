@@ -28,18 +28,29 @@ export const onStatus = (fn) => { statusListeners.add(fn); return () => statusLi
 function emitStatus(state) { statusListeners.forEach((fn) => fn(state)); }
 function emitChange() { changeListeners.forEach((fn) => fn()); }
 
-// The SQLite engine (sql.js, WebAssembly).
-// It is loaded when the page opens, not at the first tap, and the page reads the .wasm file itself and hands
-// the bytes to sql.js. Reason (v2.2.2): in the app installed on an iPhone, leaving the download to sql.js at
-// tap time could wait forever on the service worker, so "new database" and "sample data" did nothing.
-// Four ways to get the file, tried in order, each with a time limit (v2.2.3: on an installed iPhone app the
-// plain download failed outright, "both async and sync fetching of the wasm failed"):
-//   1. the offline cache, read directly   2. a normal download   3. a download that skips the service worker
-//   4. the copy shipped as text inside vendor/sql-wasm-embedded.js, which travels like the app's own scripts.
-// If all four fail, the person sees an error with the reasons instead of a button that does nothing.
+// The SQLite engine (sql.js, WebAssembly, a 685 KB file).
+// The page gets the file itself and hands the bytes to sql.js; it starts when the page opens, not at the first tap.
+//
+// History: in the app installed on an iPhone the engine never arrived. The error list from that phone (v2.2.3)
+// read: not in the offline cache, plain download "Load failed", a second download stalled mid-file, the embedded
+// copy never finished. So the cause is a connection that cannot carry one large file in one go (slow or
+// interrupted link to the host), not a missing feature. Small files arrived fine.
+//
+// So the file is fetched in small pieces (48 KB, HTTP Range), each piece retried on its own; a cut connection
+// costs one piece, not the whole file. When it has arrived once it is saved in the browser's cache under
+// ENGINE_CACHE, and every later start reads it from there without the network.
+// Order: 1. saved copy or offline cache  2. pieces  3. one plain download  4. the copy shipped as text in
+// vendor/sql-wasm-embedded.js. If all fail the person sees why; progress is reported through onEngineProgress.
 const WASM_URL = 'vendor/sql-wasm.wasm';
+const ENGINE_CACHE = 'engine-sqljs-1';     // not "geekorbit-…": sw.js deletes old caches with that prefix
+const PIECE = 48 * 1024;
 let enginePromise = null;
+let engineProgress = null;                 // 0..1 while downloading, null otherwise
+const progressListeners = new Set();
+export const onEngineProgress = (fn) => { progressListeners.add(fn); fn(engineProgress); return () => progressListeners.delete(fn); };
+function setProgress(v) { engineProgress = v; progressListeners.forEach((fn) => fn(v)); }
 
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const within = (promise, ms, what) => Promise.race([
   promise,
   new Promise((_, reject) => setTimeout(() => reject(new Error(`${what}: no answer after ${ms / 1000}s`)), ms)),
@@ -47,23 +58,54 @@ const within = (promise, ms, what) => Promise.race([
 
 const isWasm = (bytes) => bytes.length > 1000 && bytes[0] === 0 && bytes[1] === 0x61 && bytes[2] === 0x73 && bytes[3] === 0x6d;   // "\0asm"
 
-async function fetchBytes(url, label, ms) {
-  const res = await within(fetch(url), ms, label);
+async function fetchBytes(url, label, ms, init) {
+  const res = await within(fetch(url, init), ms, label);
   if (!res.ok) throw new Error(`${label}: HTTP ${res.status}`);
-  return new Uint8Array(await within(res.arrayBuffer(), ms, `${label} read`));
+  return { res, bytes: new Uint8Array(await within(res.arrayBuffer(), ms, `${label} read`)) };
+}
+
+/** The file in pieces. "?direct=1" keeps the service worker out of it (sw.js), so Range reaches the server. */
+async function inPieces() {
+  if (navigator.onLine === false) throw new Error('offline');   // no network: go straight to the copy kept with the app
+  const url = `${WASM_URL}?direct=1`;
+  let total = 0;
+  let out = null;
+  for (let start = 0; total === 0 || start < total;) {
+    const end = start + PIECE - 1;
+    let got = null;
+    let lastErr = null;
+    for (let attempt = 0; attempt < 8 && !got; attempt++) {
+      try { got = await fetchBytes(url, 'piece', 25000, { headers: { Range: `bytes=${start}-${end}` }, cache: 'no-store' }); }
+      catch (err) { lastErr = err; await sleep(Math.min(400 * (attempt + 1), 3000)); }
+    }
+    if (!got) throw new Error(`piece at ${Math.round(start / 1024)}KB: ${String(lastErr?.message || lastErr).slice(0, 30)}`);
+    if (got.res.status !== 206) {            // the server sent the whole file instead of a piece
+      setProgress(1);
+      return got.bytes;
+    }
+    if (!total) {
+      total = Number((got.res.headers.get('Content-Range') || '').split('/')[1]);
+      if (!total) throw new Error('piece: no size');
+      out = new Uint8Array(total);
+    }
+    out.set(got.bytes.subarray(0, Math.min(got.bytes.length, total - start)), start);
+    start += got.bytes.length;
+    setProgress(Math.min(start / total, 1));
+  }
+  return out;
 }
 
 const WASM_SOURCES = [
-  ['cache', async () => {
+  ['saved', async () => {
     if (!('caches' in window)) throw new Error('no cache');
     const hit = await within(caches.match(WASM_URL, { ignoreSearch: true }), 4000, 'cache');
-    if (!hit || !hit.ok) throw new Error('not cached');
+    if (!hit || !hit.ok) throw new Error('not saved yet');
     return new Uint8Array(await within(hit.arrayBuffer(), 8000, 'cache read'));
   }],
-  ['download', () => fetchBytes(WASM_URL, 'download', 12000)],
-  ['direct', () => fetchBytes(`${WASM_URL}?direct=1`, 'direct', 12000)],   // sw.js leaves "?direct" requests alone
+  ['pieces', inPieces],
+  ['download', async () => { if (navigator.onLine === false) throw new Error('offline'); return (await fetchBytes(WASM_URL, 'download', 90000)).bytes; }],
   ['embedded', async () => {
-    const text = (await within(import('../vendor/sql-wasm-embedded.js'), 30000, 'embedded')).default;
+    const text = (await within(import('../vendor/sql-wasm-embedded.js'), 120000, 'embedded')).default;
     const raw = atob(text);
     const bytes = new Uint8Array(raw.length);
     for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
@@ -71,16 +113,29 @@ const WASM_SOURCES = [
   }],
 ];
 
+async function keepEngine(bytes) {
+  try {
+    const cache = await caches.open(ENGINE_CACHE);
+    await cache.put(WASM_URL, new Response(bytes, { headers: { 'Content-Type': 'application/wasm', 'Content-Length': String(bytes.length) } }));
+  } catch { /* private mode or no room: it is fetched again next time */ }
+}
+
 async function wasmBytes() {
   const problems = [];
-  for (const [name, get] of WASM_SOURCES) {
-    try {
-      const bytes = await get();
-      if (isWasm(bytes)) return bytes;
-      problems.push(`${name}: not a wasm file`);
-    } catch (err) { problems.push(`${name}: ${String(err?.message || err).slice(0, 40)}`); }
-  }
-  throw new Error(`engine file: ${problems.join(' | ')}`);
+  try {
+    for (const [name, get] of WASM_SOURCES) {
+      try {
+        if (name !== 'saved') setProgress(engineProgress ?? 0);
+        const bytes = await get();
+        if (isWasm(bytes)) {
+          if (name !== 'saved') keepEngine(bytes);
+          return bytes;
+        }
+        problems.push(`${name}: not a wasm file`);
+      } catch (err) { problems.push(`${name}: ${String(err?.message || err).slice(0, 44)}`); }
+    }
+    throw new Error(`engine file: ${problems.join(' | ')}`);
+  } finally { setProgress(null); }
 }
 
 async function loadEngine() {

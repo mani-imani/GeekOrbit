@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.4 · Nov 2026
+- Slow or interrupted connections: the database engine (one 685 KB file) is now downloaded in small pieces, each retried on its own, and the button shows the progress in percent. Once it has arrived it is saved on the device, so later starts do not need the network for it.
+- The offline copy of the app no longer depends on the two large engine files arriving during installation.
+
 ## v2.2.3 · Nov 2026
 - Installed app on iPhone and iPad: the engine file could not be downloaded at all ("both async and sync fetching of the wasm failed"). The app now has four ways to get it, tried in order: the offline copy, a normal download, a download that skips the service worker, and a copy shipped inside the app as text. If all fail, the message lists why each one failed.
 

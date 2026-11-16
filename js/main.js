@@ -4,6 +4,7 @@ import * as db from './db.js';
 import { VERSION, ROUTES } from './model.js';
 import { icon, iconButton, toast, openDialog } from './ui.js';
 import { parseHash } from './router.js';
+import { fa } from './util.js';
 import { openBackupDialog } from './backup.js';
 import { initShortcuts, openShortcutsDialog } from './shortcuts.js';
 import * as dashboard from './views/dashboard.js';
@@ -160,7 +161,14 @@ async function guard(action, button) {
   guardBusy = true;
   // the tapped button shows that something is happening; the engine can take a moment on a slow phone
   const label = button?.innerHTML;
-  if (button) { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = 'در حال آماده‌سازی…'; }
+  let stopProgress = null;
+  if (button) {
+    button.disabled = true; button.setAttribute('aria-busy', 'true');
+    // on a slow connection the engine (one 685 KB file) arrives in pieces: show how far it is
+    stopProgress = db.onEngineProgress((v) => {
+      button.textContent = v == null ? 'در حال آماده‌سازی…' : `در حال دریافت موتور پایگاه داده… ${fa(Math.round(v * 100))}٪`;
+    });
+  }
   try {
     await action();
     await afterLoad();
@@ -168,9 +176,10 @@ async function guard(action, button) {
     if (err?.name === 'AbortError') return;        // the person closed the picker
     console.error(err);
     // unknown errors show their own text too, so a problem on one device can be reported and fixed
-    const detail = err?.code ? '' : ` <small dir="ltr">(${String(err?.name || 'Error')}: ${String(err?.message || err).slice(0, 260).replace(/[<&]/g, '')})</small>`;
+    const detail = err?.code ? '' : ` <small dir="ltr">(${String(err?.name || 'Error')}: ${String(err?.message || err).slice(0, 320).replace(/[<&]/g, '')})</small>`;
     showGate(ERRORS[err?.code] || `انجام نشد. دوباره تلاش کنید.${detail}`);
   } finally {
+    stopProgress?.();
     guardBusy = false;
     if (button && button.isConnected) { button.disabled = false; button.removeAttribute('aria-busy'); button.innerHTML = label; }
   }

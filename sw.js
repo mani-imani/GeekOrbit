@@ -1,7 +1,7 @@
 // GeekOrbit service worker: the whole app is cached so it opens and works without internet.
 // Your data is never here: it lives in your .sqlite file (or in memory in sample mode).
 // Raise VERSION together with VERSION in js/model.js on every release, and list new files in ASSETS.
-const VERSION = 'v2.2.2';
+const VERSION = 'v2.2.4';
 const CACHE = `geekorbit-${VERSION}`;
 const ASSETS = [
   "./",
@@ -53,12 +53,19 @@ const ASSETS = [
   "./js/views/dashboard.js",
   "./js/views/projects.js",
   "./js/views/tags.js",
+  "./vendor/sql-wasm-embedded.js",
   "./vendor/sql-wasm.js",
   "./vendor/sql-wasm.wasm"
 ];
 
+// The two large engine files are fetched on their own and may fail without stopping the install: on a slow
+// connection they used to make the whole offline copy fail (v2.2.4). The page saves the engine itself once it
+// has it (js/db.js, cache "engine-sqljs-1"), which this worker also serves.
+const LARGE = ["./vendor/sql-wasm.wasm", "./vendor/sql-wasm-embedded.js"];
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(CACHE).then((c) => c.addAll(ASSETS)));
+  e.waitUntil(caches.open(CACHE).then((c) =>
+    c.addAll(ASSETS.filter((a) => !LARGE.includes(a)))
+      .then(() => { LARGE.forEach((a) => c.add(a).catch(() => {})); })));   // not awaited: best effort
 });
 
 self.addEventListener('activate', (e) => {
@@ -73,7 +80,9 @@ self.addEventListener('message', (e) => { if (e.data === 'SKIP_WAITING') self.sk
 // cache first for the app's own files; anything else goes to the network
 self.addEventListener('fetch', (e) => {
   const req = e.request;
-  if (req.method !== 'GET' || new URL(req.url).origin !== self.location.origin) return;
+  const url = new URL(req.url);
+  if (req.method !== 'GET' || url.origin !== self.location.origin) return;
+  if (url.searchParams.has('direct')) return;   // the page asked for a plain network request (js/db.js, engine file)
   e.respondWith(caches.match(req, { ignoreSearch: true }).then((hit) => hit || fetch(req).catch(() =>
     (req.mode === 'navigate' ? caches.match('./index.html') : Response.error()))));
 });
