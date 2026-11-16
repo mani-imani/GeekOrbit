@@ -70,7 +70,7 @@ export function render(root, params) {
         return `<tr>
           <td class="go-cell--main" data-label="پروژه">${projectTitle(c)}</td>
           <td data-label="حساب">${accountLabel(acc, ordinals)}${limitedHtml(acc) ? `<span class="go-sub">${limitedHtml(acc)}</span>` : ''}</td>
-          <td data-label="خلاصه">${c.phase ? `<strong>${u(c.phase)}</strong>` : ''}${c.summary ? `<span class="go-sub">${u(c.summary)}</span>` : ''}${c.next_step ? `<span class="go-sub">گام بعدی: ${u(c.next_step)}</span>` : ''}</td>
+          <td data-label="خلاصه" class="go-cell--stack">${c.phase ? `<strong>${u(c.phase)}</strong>` : ''}${c.summary ? `<span class="go-sub">${u(c.summary)}</span>` : ''}${c.next_step ? `<span class="go-sub">گام بعدی: ${u(c.next_step)}</span>` : ''}</td>
           <td data-label="وضعیت" class="go-cell--nowrap">${statusHtml(c.status)}${c.stale ? `<span class="go-sub">${staleHtml(c)}</span>` : ''}</td>
           <td data-label="به‌روزرسانی" class="go-cell--nowrap">${fmtDate(c.last_update)}<span class="go-sub">${relDays(c.last_update)}</span></td>
           <td class="go-cell--actions">${chatActions(c)}</td></tr>`;

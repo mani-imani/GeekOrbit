@@ -8,7 +8,7 @@
 <p align="center">A local, offline dashboard that shows which of your AI chatbot accounts each project and conversation lives on.</p>
 
 <p align="center"><a href="https://mani-imani.github.io/GeekOrbit/"><b>mani-imani.github.io/GeekOrbit</b></a></p>
-<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.2.0</code></p>
+<p align="center"><a href="#فارسی">فارسی</a> · <a href="#english">English</a> · <code>v2.2.1</code></p>
 
 <p align="center"><img src="docs/screenshot.png" alt="GeekOrbit dashboard" width="760"></p>
 
@@ -98,7 +98,7 @@ GeekOrbit/
 کد با مجوز <bdi>MIT</bdi> (فایل <code dir="ltr">LICENSE</code>). <bdi>sql.js</bdi> و آیکون‌های <bdi>Bootstrap</bdi> مجوز <bdi>MIT</bdi> و فونت‌ها مجوز <bdi>SIL OFL</bdi> دارند؛ فایل مجوز هر کدام کنار خودش است.
 
 ### نسخه
-<code dir="ltr">v2.2.0</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
+<code dir="ltr">v2.2.1</code> · تاریخچه در [CHANGELOG.md](CHANGELOG.md).
 
 </div>
 
@@ -178,7 +178,7 @@ GeekOrbit/
 Code under the MIT license (see [LICENSE](LICENSE)). sql.js and Bootstrap Icons are MIT; the fonts are SIL OFL. Each license file sits next to its files.
 
 ### Version
-`v2.2.0` · see [CHANGELOG.md](CHANGELOG.md).
+`v2.2.1` · see [CHANGELOG.md](CHANGELOG.md).
 
 ---
 

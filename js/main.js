@@ -111,6 +111,10 @@ const ERRORS = {
   TOO_NEW: 'این فایل با نسخه‌ی جدیدتری ساخته شده و اینجا باز نمی‌شود.',
 };
 
+// iPhone and iPad grey out files whose extension they do not know (.sqlite), so the picker there takes any file;
+// a wrong file is still refused after it is read.
+const IS_IOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 function showGate(message = '') {
   started = false;
   $('header').hidden = true;
@@ -131,7 +135,7 @@ function showGate(message = '') {
         <div class="go-gate__actions">
           <button type="button" class="gm-btn gm-btn--primary" data-gate="new">${icon('plus-lg')} ساخت پایگاه داده‌ی تازه</button>
           <button type="button" class="gm-btn gm-btn--secondary" data-gate="open">${icon('folder2')} باز کردن فایل موجود</button>
-          <input type="file" id="gateFile" accept=".sqlite,.db" hidden>
+          <input type="file" id="gateFile" ${IS_IOS ? '' : 'accept=".sqlite,.db"'} hidden>
           <button type="button" class="go-gate__demo" data-gate="demo">${icon('speedometer2')} اول با داده‌ی نمونه امتحان کنید</button>
         </div>
         <p class="go-gate__note">${fsa ? 'تغییرها خودکار در همان فایل ذخیره می‌شوند.' : 'این مرورگر نوشتن در فایل را پشتیبانی نمی‌کند. تغییرها را با دانلود نسخه‌ی SQLite نگه دارید. برای ذخیره‌ی خودکار، Chrome یا Edge را باز کنید.'}</p>
@@ -157,7 +161,9 @@ async function guard(action) {
   } catch (err) {
     if (err?.name === 'AbortError') return;        // the person closed the picker
     console.error(err);
-    showGate(ERRORS[err?.code] || 'باز کردن فایل انجام نشد. دوباره تلاش کنید.');
+    // unknown errors show their own text too, so a problem on one device can be reported and fixed
+    const detail = err?.code ? '' : ` <small dir="ltr">(${String(err?.name || 'Error')}: ${String(err?.message || err).slice(0, 140).replace(/[<&]/g, '')})</small>`;
+    showGate(ERRORS[err?.code] || `انجام نشد. دوباره تلاش کنید.${detail}`);
   }
 }
 
@@ -196,6 +202,12 @@ async function afterLoad() {
 }
 
 // ---- start ---------------------------------------------------------------------------
+
+// no accidental zoom on touch screens: Safari ignores user-scalable=no, so pinch is stopped here;
+// double-tap zoom is turned off by "touch-action: manipulation" in the stylesheet
+document.addEventListener('gesturestart', (e) => e.preventDefault());
+document.addEventListener('gesturechange', (e) => e.preventDefault());
+document.addEventListener('touchmove', (e) => { if (e.touches.length > 1) e.preventDefault(); }, { passive: false });
 
 $('version').textContent = VERSION;
 initTheme();

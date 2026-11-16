@@ -1,7 +1,7 @@
 // GeekOrbit service worker: the whole app is cached so it opens and works without internet.
 // Your data is never here: it lives in your .sqlite file (or in memory in sample mode).
 // Raise VERSION together with VERSION in js/model.js on every release, and list new files in ASSETS.
-const VERSION = 'v2.2.0';
+const VERSION = 'v2.2.1';
 const CACHE = `geekorbit-${VERSION}`;
 const ASSETS = [
   "./",

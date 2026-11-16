@@ -42,7 +42,8 @@ function closeCard() {
 
 function openCard() {
   if (card || !canInstall()) return;
-  if (document.querySelector('dialog[open]')) { setTimeout(openCard, 4000); return; }   // never on top of a dialog
+  // never on top of a dialog, and never on the first screen: on a phone the card would cover its buttons
+  if (document.querySelector('dialog[open], .go-gate')) { setTimeout(openCard, 4000); return; }
   markSeen();
   card = document.createElement('section');
   card.className = 'go-install';

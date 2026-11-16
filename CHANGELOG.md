@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.2.1 · Nov 2026
+- Phones: the install card no longer covers the buttons of the start screen ("new database", "open a file", "sample data"). It now waits until a database is open.
+- No accidental zoom on iPhone and iPad: pinch and double-tap zoom are off, and every field is at least 16px on touch screens, so iOS no longer zooms in when a field takes focus.
+- iPhone and iPad: "open an existing file" accepts any file in the picker, because iOS greys out the `.sqlite` extension; a wrong file is still refused.
+- On phones, a chat's summary, title and next step are stacked instead of squeezed into three columns.
+- If creating or opening a database fails for an unknown reason, the message now includes the error text.
+
 ## v2.2.0 · Nov 2026
 - Install as an app (PWA): a web app manifest, brand icons for the home screen (including a maskable one), and a service worker that keeps the whole app, sql.js included, for offline use. Your data still lives only in your `.sqlite` file.
 - Install card on the first visit, on every browser that can install the app: the browser's own prompt where it offers one, otherwise the steps for iPhone and iPad, Android, Mac and desktop Chrome or Edge. Afterwards an "install on this device" link stays in the footer.
