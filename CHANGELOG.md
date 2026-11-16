@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.2 · Nov 2026
+- Installed app on iPhone and iPad: "new database" and "sample data" did nothing. The SQLite engine was downloaded at the first tap, and in the installed app that download could wait forever. The engine now loads when the app opens, the app reads the engine file itself (from the offline copy first, then the network), and every step has a time limit, so a failure shows an error instead of a button that does nothing.
+- The tapped button shows "preparing" while the engine starts.
+
 ## v2.2.1 · Nov 2026
 - Phones: the install card no longer covers the buttons of the start screen ("new database", "open a file", "sample data"). It now waits until a database is open.
 - No accidental zoom on iPhone and iPad: pinch and double-tap zoom are off, and every field is at least 16px on touch screens, so iOS no longer zooms in when a field takes focus.
