@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.2.3 · Nov 2026
+- Installed app on iPhone and iPad: the engine file could not be downloaded at all ("both async and sync fetching of the wasm failed"). The app now has four ways to get it, tried in order: the offline copy, a normal download, a download that skips the service worker, and a copy shipped inside the app as text. If all fail, the message lists why each one failed.
+
 ## v2.2.2 · Nov 2026
 - Installed app on iPhone and iPad: "new database" and "sample data" did nothing. The SQLite engine was downloaded at the first tap, and in the installed app that download could wait forever. The engine now loads when the app opens, the app reads the engine file itself (from the offline copy first, then the network), and every step has a time limit, so a failure shows an error instead of a button that does nothing.
 - The tapped button shows "preparing" while the engine starts.

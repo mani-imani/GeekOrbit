@@ -142,8 +142,8 @@ function showGate(message = '') {
       </div>
     </section>`;
   const fileInput = $('gateFile');
-  app.querySelector('[data-gate="new"]').addEventListener('click', () => guard(() => db.createNew()));
-  app.querySelector('[data-gate="demo"]').addEventListener('click', () => guard(() => db.createDemo()));
+  app.querySelector('[data-gate="new"]').addEventListener('click', (e) => guard(() => db.createNew(), e.currentTarget));
+  app.querySelector('[data-gate="demo"]').addEventListener('click', (e) => guard(() => db.createDemo(), e.currentTarget));
   app.querySelector('[data-gate="open"]').addEventListener('click', () => {
     if (fsa) guard(() => db.openWithPicker());
     else fileInput.click();
@@ -154,7 +154,13 @@ function showGate(message = '') {
   });
 }
 
-async function guard(action) {
+let guardBusy = false;
+async function guard(action, button) {
+  if (guardBusy) return;
+  guardBusy = true;
+  // the tapped button shows that something is happening; the engine can take a moment on a slow phone
+  const label = button?.innerHTML;
+  if (button) { button.disabled = true; button.setAttribute('aria-busy', 'true'); button.textContent = 'در حال آماده‌سازی…'; }
   try {
     await action();
     await afterLoad();
@@ -162,8 +168,11 @@ async function guard(action) {
     if (err?.name === 'AbortError') return;        // the person closed the picker
     console.error(err);
     // unknown errors show their own text too, so a problem on one device can be reported and fixed
-    const detail = err?.code ? '' : ` <small dir="ltr">(${String(err?.name || 'Error')}: ${String(err?.message || err).slice(0, 140).replace(/[<&]/g, '')})</small>`;
+    const detail = err?.code ? '' : ` <small dir="ltr">(${String(err?.name || 'Error')}: ${String(err?.message || err).slice(0, 260).replace(/[<&]/g, '')})</small>`;
     showGate(ERRORS[err?.code] || `انجام نشد. دوباره تلاش کنید.${detail}`);
+  } finally {
+    guardBusy = false;
+    if (button && button.isConnected) { button.disabled = false; button.removeAttribute('aria-busy'); button.innerHTML = label; }
   }
 }
 
@@ -214,4 +223,5 @@ initTheme();
 buildChrome();
 initShortcuts();
 showGate();
+db.warmUp();
 initPWA();

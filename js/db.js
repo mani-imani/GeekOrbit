@@ -28,10 +28,76 @@ export const onStatus = (fn) => { statusListeners.add(fn); return () => statusLi
 function emitStatus(state) { statusListeners.forEach((fn) => fn(state)); }
 function emitChange() { changeListeners.forEach((fn) => fn()); }
 
+// The SQLite engine (sql.js, WebAssembly).
+// It is loaded when the page opens, not at the first tap, and the page reads the .wasm file itself and hands
+// the bytes to sql.js. Reason (v2.2.2): in the app installed on an iPhone, leaving the download to sql.js at
+// tap time could wait forever on the service worker, so "new database" and "sample data" did nothing.
+// Four ways to get the file, tried in order, each with a time limit (v2.2.3: on an installed iPhone app the
+// plain download failed outright, "both async and sync fetching of the wasm failed"):
+//   1. the offline cache, read directly   2. a normal download   3. a download that skips the service worker
+//   4. the copy shipped as text inside vendor/sql-wasm-embedded.js, which travels like the app's own scripts.
+// If all four fail, the person sees an error with the reasons instead of a button that does nothing.
+const WASM_URL = 'vendor/sql-wasm.wasm';
+let enginePromise = null;
+
+const within = (promise, ms, what) => Promise.race([
+  promise,
+  new Promise((_, reject) => setTimeout(() => reject(new Error(`${what}: no answer after ${ms / 1000}s`)), ms)),
+]);
+
+const isWasm = (bytes) => bytes.length > 1000 && bytes[0] === 0 && bytes[1] === 0x61 && bytes[2] === 0x73 && bytes[3] === 0x6d;   // "\0asm"
+
+async function fetchBytes(url, label, ms) {
+  const res = await within(fetch(url), ms, label);
+  if (!res.ok) throw new Error(`${label}: HTTP ${res.status}`);
+  return new Uint8Array(await within(res.arrayBuffer(), ms, `${label} read`));
+}
+
+const WASM_SOURCES = [
+  ['cache', async () => {
+    if (!('caches' in window)) throw new Error('no cache');
+    const hit = await within(caches.match(WASM_URL, { ignoreSearch: true }), 4000, 'cache');
+    if (!hit || !hit.ok) throw new Error('not cached');
+    return new Uint8Array(await within(hit.arrayBuffer(), 8000, 'cache read'));
+  }],
+  ['download', () => fetchBytes(WASM_URL, 'download', 12000)],
+  ['direct', () => fetchBytes(`${WASM_URL}?direct=1`, 'direct', 12000)],   // sw.js leaves "?direct" requests alone
+  ['embedded', async () => {
+    const text = (await within(import('../vendor/sql-wasm-embedded.js'), 30000, 'embedded')).default;
+    const raw = atob(text);
+    const bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  }],
+];
+
+async function wasmBytes() {
+  const problems = [];
+  for (const [name, get] of WASM_SOURCES) {
+    try {
+      const bytes = await get();
+      if (isWasm(bytes)) return bytes;
+      problems.push(`${name}: not a wasm file`);
+    } catch (err) { problems.push(`${name}: ${String(err?.message || err).slice(0, 40)}`); }
+  }
+  throw new Error(`engine file: ${problems.join(' | ')}`);
+}
+
+async function loadEngine() {
+  if (typeof window.initSqlJs !== 'function') throw new Error('sql-wasm.js did not load');
+  const wasmBinary = await wasmBytes();
+  return within(window.initSqlJs({ wasmBinary, locateFile: (f) => `vendor/${f}` }), 20000, 'engine start');
+}
+
 async function ensureEngine() {
-  if (!SQL) SQL = await window.initSqlJs({ locateFile: (f) => `vendor/${f}` });
+  if (SQL) return SQL;
+  if (!enginePromise) enginePromise = loadEngine();
+  try { SQL = await enginePromise; } catch (err) { enginePromise = null; throw err; }   // a later tap tries again
   return SQL;
 }
+
+/** Start loading the engine now (called when the page opens). Errors wait for the first real use. */
+export function warmUp() { ensureEngine().catch(() => {}); }
 
 function open(bytes) {
   db = bytes ? new SQL.Database(bytes) : new SQL.Database();
